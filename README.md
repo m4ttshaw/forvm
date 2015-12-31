@@ -1,4 +1,7 @@
 forvm
 =====
+Basic and Adavance Implementation with test.
 
-# forvm
+to start:
+BASIC: python3 start.py test
+ADVANCE: python3 start.py test2
