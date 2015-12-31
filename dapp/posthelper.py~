@@ -1,0 +1,9 @@
+class PostHelper:
+    def __init__(self, database):
+        self.Database = database
+
+    def postExist(self, post_ID):
+        for post in self.database:
+            if post['id'] == post_ID:
+                return True
+        return False
