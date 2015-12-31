@@ -318,14 +318,14 @@ if __name__ == "__main__":
             
         elif sys.argv[1] == 'test2':
             deadline = time.strptime('12/12/2016-10:15', '%d/%m/%Y-%H:%M')
-            #pollid = bsMan.createPoll('Title', ['answer1', 'answer2'], deadline)
-            pollid = '623ed6f54bb36428407058cbf3a0335d51784e90de444645a9faba74c6e843b6'
+            pollid = bsMan.createPoll('Title', ['answer1', 'answer2'], deadline)
+            #pollid = '623ed6f54bb36428407058cbf3a0335d51784e90de444645a9faba74c6e843b6'
 
             waitPoll(pollid)
             bsMan.listPolls()
             
             voteid1 = bsMan.vote(pollid, 'answer1')
-            time.sleep(5)
+            time.sleep(300)
             
             voteid2 = bsMan.vote(pollid, 'answer2')
                 
@@ -340,5 +340,7 @@ if __name__ == "__main__":
             pollid2 = bsMan2.createPoll('Title', ['answer1', 'answer2'], deadline)
             waitPoll(pollid2)
             bsMan.listPolls()
+
+            print("test passed")
             
         print ('usage:', sys.argv[0], 'createPost | listPosts | getPostInfo | commentPost | createPoll | listPolls | getPollInfo | editPost | test | test2')

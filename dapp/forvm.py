@@ -151,7 +151,7 @@ class ForvmAPI (dapp.API):
         return self.core.listPolls ()
 
     def method_getpollinfo(self, poll_id):
-        return self.core.getPollInfo(post_id)
+        return self.core.getPollInfo(poll_id)
     
     def method_vote (self, user, pollID, answer):
         msg = VoteMessage.vote (user, pollID, answer)
