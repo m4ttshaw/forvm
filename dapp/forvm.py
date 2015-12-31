@@ -114,10 +114,13 @@ class ForvmAPI (dapp.API):
         rpcmethods = {}
         rpcmethods['writenewpost'] = {"call": self.method_writenewpost, "help":{"args":["user", "title", "text"], "return": {}}}
         rpcmethods['listposts'] = {"call": self.method_listposts, "help": {"args": [], "return":{}}}
+        rpcmethods['getpostinfo'] = {"call": self.method_getpostinfo, "help": {"args": ["post_id"], "return":{}}}
         rpcmethods['commentpost'] = {"call": self.method_commentpost, "help":{"args":["user", "pid", "com"], "return": {}}}
 
         rpcmethods['createpoll'] = {"call": self.method_createpoll, "help":{"args":["user", "title", "choices", "deadline"], "return": {}}}
-        rpcmethods['listpolls'] = {"call": self.method_listpolls, "help":{"args":[], "return": {}}}        
+        rpcmethods['listpolls'] = {"call": self.method_listpolls, "help":{"args":[], "return": {}}}
+        rpcmethods['getpollinfo'] = {"call": self.method_getpollinfo, "help": {"args": ["poll_id"], "return":{}}}
+        
         rpcmethods['vote'] = {"call": self.method_vote, "help":{"args":["user", "pollid", "answer"], "return": {}}}
 
         
@@ -133,6 +136,9 @@ class ForvmAPI (dapp.API):
     def method_listposts (self):
         return self.core.listPosts ()
 
+    def method_getpostinfo(self, post_id):
+        return self.core.getPostInfo(post_id)
+
     def method_commentpost (self, user, post_id, comment):
         msg = CommentPostMessage.commentPost (user, post_id, comment)
         return self.createTransactionResponse(msg)
@@ -143,6 +149,9 @@ class ForvmAPI (dapp.API):
 
     def method_listpolls (self):
         return self.core.listPolls ()
+
+    def method_getpollinfo(self, poll_id):
+        return self.core.getPollInfo(post_id)
     
     def method_vote (self, user, pollID, answer):
         msg = VoteMessage.vote (user, pollID, answer)
@@ -166,12 +175,22 @@ class ForvmCore (dapp.Core):
                 return True
         return False
 
-    def commentExist(self, post_ID, comment_ID):
-        for post in self.postList:
+    def commentExist(self, post_ID, postList, comment_ID):
+        for post in postList:
             if post['id'] == post_ID:
-                for comment in post[post_ID]:
+                for comment in post['comments']:
                     if comment['id'] == comment_ID:
                         return True
+        return False
+
+    def alreadyVote(self, poll_id, poll_list, user):
+        for poll in poll_list:
+            if poll['id'] == poll_id:
+                dict_choices = poll['choices'].keys()
+                for choice in dict_choices:
+                    for vote in poll['choices'][choice]:
+                       if vote['user'] == user :
+                            return True
         return False
     
     #################################################
@@ -194,12 +213,20 @@ class ForvmCore (dapp.Core):
                 l.append(elm)
         return l
 
+    def getPostInfo(self, post_id):
+        data = self.database.get('posts_db')
+
+        for post in data:
+            if post['id'] == post_id:
+                return post
+        return None
+        
     def commentPost(self, user, post_id, comment_id, text):
         data = self.database.get('posts_db')
-        query = {'user': user, 'commentID' : comment_id, 'text': text}
+        query = {'user': user, 'id' : comment_id, 'text': text}
     
         for post in data:
-            if not (self.commentExist(post_id, comment_id)):
+            if not (self.commentExist(post_id, data, comment_id)):
                 post['comments'].append(query)
         self.database.set('posts_db', data)
 
@@ -229,9 +256,20 @@ class ForvmCore (dapp.Core):
                 l.append(elm)
         return l
 
+    def getPollInfo(self, poll_id):
+        data = self.database.get('polls_db')
+
+        for poll in data:
+            if poll['id'] == poll_id:
+                return poll
+        return None
+
     def vote(self, vote_id, user, poll_id, answer):
         data = self.database.get('polls_db')
         query = {'id': vote_id, 'user': user}
+
+        if self.alreadyVote(poll_id, data, user):
+            raise ValueError('user ' + user + ' has already vote')
         
         for elm in data:
             if elm['id'] == poll_id:                    
@@ -263,4 +301,7 @@ class forvm (dapp.Dapp):
 
         if m.Method == ForvmProto.METHOD_VOTE :
             logger.pluginfo("Found new vote! > pollID: %s", m.Data['pollid'])
-            self.core.vote(m.Hash, m.Data['user'], m.Data['pollid'], m.Data['answer'])
+            try:
+                self.core.vote(m.Hash, m.Data['user'], m.Data['pollid'], m.Data['answer'])
+            except ValueError as err:
+                logger.error(err)

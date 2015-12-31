@@ -17,6 +17,9 @@ class ForvmManager (DappManager.DappManager):
     def listPosts(self):
         return self.consensusManager.jsonConsensusCall('forvm.listposts', [])['result']
 
+    def getPostInfo(self, post_id):
+        return self.consensusManager.jsonConsensusCall('forvm.getpostinfo', [post_id])['result']
+        
     def commentPost(self, post_id, comment):
         cid = self.produceTransaction('forvm.commentpost', [self.User, post_id, comment])
         return cid
@@ -28,6 +31,9 @@ class ForvmManager (DappManager.DappManager):
     def listPolls(self):
         return self.consensusManager.jsonConsensusCall('forvm.listpolls',[])['result']
 
+    def getPollInfo(self, poll_id):
+        return self.consensusManager.jsonConsensusCall('forvm.getpollinfo',[poll_id])['result']
+    
     def vote(self, pollID, answer):
         cid = self.produceTransaction('forvm.vote', [self.User, pollID, answer])
         return cid

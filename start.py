@@ -253,12 +253,14 @@ def waitVote(poll_id, vote_id):
         pollList = bsMan.listPolls()
         for poll in pollList:
             if poll['id'] == poll_id:
-                #scorriamo le scelte
-                choices = poll['choices'].keys()
-                for choice in choices:
-                    for elm in poll['id'][choice]:
-                        if elm['id'] == vote_id:
-                            print('vote ' + vote_id + ' founded in poll ' + poll_id)
+                dict_choices = poll['choices'].keys()
+                #print (dict_choices)
+                for choice in dict_choices:
+                    #print (choice)
+                    #print (poll['choices'][choice]) #list
+                    for vote in poll['choices'][choice]:
+                       if vote['id'] == vote_id :
+                            print ('vote ' + vote_id + ' founded')
                             return
         print('waiting vote ' + vote_id)
         time.sleep(60)
@@ -290,16 +292,22 @@ if __name__ == "__main__":
         ## elif sys.argv[1] == 'vote':
         ##     vote_key(bsMan)
         ##     sys.exit(0)
-        if sys.argv[1] == 'test':
+
+        if sys.argv[1] == 'posts':
+            print (bsMan.listPosts())
+        elif sys.argv[1] == 'polls':
+            print (bsMan.listPolls())
+        elif sys.argv[1] == 'test':
             #postid = bsMan.createPost('Hello post', 'Post di test')
             postid = '2d0b2d981a8337a743de70b7d425704bb88d2169406d667c448f0ca145241e92'
             waitPost(postid)
             print(bsMan.listPosts())
 
-            commid = bsMan.commentPost(postid, 'This is a comment')
-
+            #commid = bsMan.commentPost(postid, 'This is a comment')
+            commid = 'd88d419651df8f94e74ec711ee2f174b21748ac2113e9b543858ee29d6c44a99'
+            
             waitComment(postid, commid)
-            print(bsMan.getPostInfo(commid))
+            print(bsMan.getPostInfo(postid))
             
             postid2 = bsMan2.createPost('Hello post 2', 'Post di test2')
             commid2 = bsMan2.commentPost(postid, 'This is a comment of B')
@@ -310,19 +318,22 @@ if __name__ == "__main__":
             
         elif sys.argv[1] == 'test2':
             deadline = time.strptime('12/12/2016-10:15', '%d/%m/%Y-%H:%M')
-            pollid = bsMan.createPoll('Title', ['answer1', 'answer2'], deadline)
+            #pollid = bsMan.createPoll('Title', ['answer1', 'answer2'], deadline)
+            pollid = '623ed6f54bb36428407058cbf3a0335d51784e90de444645a9faba74c6e843b6'
 
             waitPoll(pollid)
             bsMan.listPolls()
             
             voteid1 = bsMan.vote(pollid, 'answer1')
+            time.sleep(5)
+            
             voteid2 = bsMan.vote(pollid, 'answer2')
-
-            waitVote(voteid1)
+                
+            waitVote(pollid, voteid1)
             bsMan.getPollInfo(pollid)
                 
             voteid3 = bsMan2.vote(pollid, 'answer2')
-            waitVote(voteid3)            
+            waitVote(pollid, voteid3)            
             bsMan.getPollInfo(pollid)
 
             
