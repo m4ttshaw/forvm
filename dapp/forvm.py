@@ -153,9 +153,9 @@ class ForvmCore (dapp.Core):
         database.init('posts_db', [])
         database.init('polls_db', [])
 
-        ## posts_db format ##
-        ## posts_db = [{'id': id0, 'title': title0, comments:[{'id': idCom0, text:}]},{}, ... {}]
-        
+        ## posts_db = [{'id': id0, user: 'user0', 'title': title0, comments:[{'id': idCom0, user: 'user0' text: 'text0'}, {'id': idCom1, ...}, {'id': idComn, ...}],{}, ..., {'id': 'idm', ....}]
+        ## polls_db = [{'id': id0, user: 'user0', 'title': title0, choices: {cho1:[A, A, ..., A], cho2:[A, A, ... A], ... chon: [...] },{}, ... , {}]
+        ## A = {'id': voteid0, 'user': userID} 
 
         super (ForvmCore, self).__init__ (chain, database)
 
@@ -199,7 +199,7 @@ class ForvmCore (dapp.Core):
         query = {'user': user, 'commentID' : comment_id, 'text': text}
     
         for post in data:
-            if not (self.find_comment_id(post_id, comment_id)):
+            if not (self.commentExist(post_id, comment_id)):
                 post['comments'].append(query)
         self.database.set('posts_db', data)
 
